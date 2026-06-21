@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>มีอะไรจะบอกแหละ... 🤍</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(135deg, #ffe5ec, #ffc2d1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 🎵 ปุ่มควบคุมเพลง ดีไซน์หัวใจลอยเด่นที่มุมขวาบน */
+        .music-control-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background-color: #ff477e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 71, 126, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        .music-control-btn.paused {
+            background-color: #a1a1a1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            animation: none;
+        }
+
+        /* การ์ดข้อความ */
+        .card {
+            background: white;
+            padding: 35px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 71, 126, 0.2);
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .card.active {
+            display: block;
+        }
+
+        h2 {
+            color: #ff477e;
+            margin-bottom: 12px;
+            font-size: 22px;
+        }
+        p {
+            color: #4a4a4a;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        .card img {
+            max-width: 100%;
+            max-height: 180px;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
+        }
+
+        .password-input {
+            width: 80%;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid #ffb3c1;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .password-input:focus {
+            border-color: #ff477e;
+            box-shadow: 0 0 8px rgba(255, 71, 126, 0.3);
+        }
+
+        .error-msg {
+            color: #de2c2c;
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .btn {
+            background-color: #ff758f;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.4);
+        }
+        .btn:hover {
+            background-color: #ff477e;
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .bg-heart {
+            position: absolute;
+            color: rgba(255, 71, 126, 0.4);
+            pointer-events: none;
+            z-index: 1;
+            animation: floatUp 4s linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🔊 ปุ่มควบคุมเสียงแบบกดทะลวงการบล็อกเบราว์เซอร์ -->
+    <button id="musicBtn" class="music-control-btn paused" onclick="toggleMusic()">🔇</button>
+
+    <!-- 🎵 ลิงก์ตรงไฟล์เพลง A ROCKET TO THE MOON - GAVIN.D ตัวจริงแน่นอนครับ -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="love.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 🔒 หน้าล็อกอิน -->
+    <div class="card active" id="loginPage">
+        <div class="icon">🔒</div>
+        <h2>หน้านี้มีความลับนะ!</h2>
+        <p>กรุณาใส่รหัสผ่านเพื่อเข้าสู่หัวใจ 💕<br><b>คำใบ้: วันครบรอบของเรา</b></p>
+        <input type="password" id="pwdField" class="password-input" placeholder="ใส่รหัสผ่านตรงนี้...">
+        <div class="error-msg" id="errorTxt">รหัสผ่านไม่ถูกต้อง ลองใหม่อีกทีนะคนดี! 🥺</div>
+        <button class="btn" onclick="checkPassword()">ปลดล็อกหัวใจ 🔑</button>
+    </div>
+
+    <!-- หน้าที่ 1 -->
+    <div class="card" id="page1">
+        <div class="icon">🚀</div>
+        <h2>เย้! เข้ามาได้แล้ว</h2>
+        <img src="https://i.ibb.co/99Ln1xN5/K1.jpg" alt="รูปภาพประกอบ">
+        <p>เค้าตั้งใจทำหน้านี้ขึ้นมาเพื่อเธอโดยเฉพาะเลยนะ<br>เลื่อนอ่านไปเรื่อยๆ นะคะ ✨<br><br><b style="color:#ff477e;">(อย่าลืมกดเปิดเพลงที่รูป 🔇 มุมขวาบนน้า)</b></p>
+        <button class="btn" onclick="nextPage(2)">เริ่มอ่านเลย ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 2 -->
+    <div class="card" id="page2">
+        <div class="icon">💖</div>
+        <h2>ขอบคุณนะ...</h2>
+        <img src="https://i.ibb.co/35wyvgJ8/K2.jpg" alt="รูปภาพประกอบ">
+        <p>ขอบคุณที่เข้ามาเป็นเรื่องราวดีๆ ในชีวิตเค้านะ<br>อยู่เป็นความสุขให้กันแบบนี้ไปนานๆ เลยรู้ไหม</p>
+        <button class="btn" onclick="nextPage(3)">หน้าถัดไป ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 3 -->
+    <div class="card" id="page3">
+        <div class="icon">🧸</div>
+        <h2>อยากบอกว่า...</h2>
+        <img src="https://i.ibb.co/KxrTFhHH/K3.jpg" alt="รูปภาพประกอบ">
+        <p>ถึงเค้าจะงอแงบ้าง ดื้อบ้างในบางที<br>กวนตีนบ้างในบางเวลา แต่ในใจเค้ามีแค่เธอคนเดียวนะคะ ไม่เคยเปลี่ยนเลย</p>
+        <button class="btn" onclick="nextPage(4)">หน้าถัดไป ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 4 -->
+    <div class="card" id="page4">
+        <div class="icon">💖</div>
+        <h2>เป็นคนที่เค้ารักมากที่สุด</h2>
+        <img src="https://i.ibb.co/6cPfjqHG/K4.jpg" alt="รูปภาพประกอบ">
+        <p>แค่นั่งดูรูปมิ้นท์ในแต่ละวัน<br>เค้าก็มีความสุขมากๆ แล้วล่ะ</p>
+        <button class="btn" onclick="nextPage(5)">หน้าถัดไป ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 5 -->
+    <div class="card" id="page5">
+        <div class="icon">🌟</div>
+        <h2>เธอคือคนพิเศษ</h2>
+        <img src="https://i.ibb.co/r2LBrsXg/K5.jpg" alt="รูปภาพประกอบ">
+        <p>ในวันที่เหนื่อยๆ แค่เห็นข้อความหรือได้ยินเสียงเธอ<br>พลังงานลบๆ ก็หายไปหมดเลย ขอบคุณนะซัพพอร์ตเตอร์ของเค้า</p>
+        <button class="btn" onclick="nextPage(6)">หน้าถัดไป ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 6 -->
+    <div class="card" id="page6">
+        <div class="icon">📸</div>
+        <h2>ความทรงจำของเรา</h2>
+        <img src="https://i.ibb.co/23BMPVXY/K6.jpg" alt="รูปภาพประกอบ">
+        <p>ย้อนกลับไปดูรูปเก่าๆ ทีไรก็นั่งอมยิ้มทุกที<br>เราผ่านอะไรด้วยกันมาเยอะเหมือนกันนะเนี่ย</p>
+        <button class="btn" onclick="nextPage(7)">หน้าถัดไป ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 7 -->
+    <div class="card" id="page7">
+        <div class="icon">🥺</div>
+        <h2>ขอโทษด้วยน้า</h2>
+        <img src="https://i.ibb.co/RkRy5HGf/K7.jpg" alt="รูปภาพประกอบ">
+        <p>บางครั้งที่เค้าใช้อารมณ์ หรือทำตัวไม่น่ารัก<br>เค้าขอโทษน้า จะพยายามเป็นแฟนที่ดีขึ้นเพื่อเธอค่ะ</p>
+        <button class="btn" onclick="nextPage(8)">หน้าถัดไป ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 8 -->
+    <div class="card" id="page8">
+        <div class="icon">🌱</div>
+        <h2>เติบโตไปด้วยกันนะ</h2>
+        <img src="https://i.ibb.co/jv2f7XWd/K8.jpg" alt="รูปภาพประกอบ">
+        <p>ขอให้เราจับมือกันแน่นๆ แบบนี้ในทุกๆ วัน<br>ก้าวผ่านทุกเรื่องราว และมีความสุขไปด้วยกันนะ</p>
+        <button class="btn" onclick="nextPage(9)">หน้าถัดไป ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 9 -->
+    <div class="card" id="page9">
+        <div class="icon">🔮</div>
+        <h2>สัญญาได้ไหม?</h2>
+        <img src="https://i.ibb.co/9HYqJdX0/K9.jpg" alt="รูปภาพประกอบ">
+        <p>ห้ามแอบเบื่อเค้าก่อนนะ ไม่ว่าจะเจออะไร<br>เราจะคุยกันดีๆ และหันหน้าเข้าหากันตลอดไปนะ</p>
+        <button class="btn" onclick="nextPage(10)">หน้าสุดท้ายแล้ว ➡️</button>
+    </div>
+
+    <!-- หน้าที่ 10 -->
+    <div class="card" id="page10">
+        <div class="icon">🌕</div>
+        <h2>รักเธอที่สุดในโลกเลย!</h2>
+        <img src="https://i.ibb.co/XZj8J8NK/K10.jpg" alt="รูปภาพประกอบ">
+        <p>Happy ขอบคุณนะครับมิ้นท์ที่อยู่กับเค้ามา 5 เดือนแล้วน่ะ<br>อยู่เป็นรอยยิ้มของกันและกันแบบนี้ไปตลอดเลยนะ จุ๊บๆ 😘</p>
+        <button class="btn" onclick="resetCard()">กลับไปดูอีกรอบ 💖</button>
+    </div>
+
+    <script>
+        const CORRECT_PASSWORD = "21012026"; 
+        const music = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicBtn');
+
+        // ตั้งระดับเสียงนุ่มๆ โรแมนติก 50%
+        music.volume = 0.5;
+
+        function toggleMusic() {
+            if (music.paused) {
+                music.play().then(() => {
+                    musicBtn.innerHTML = "🎵";
+                    musicBtn.classList.remove('paused');
+                }).catch(e => console.log("Play error:", e));
+            } else {
+                music.pause();
+                musicBtn.innerHTML = "🔇";
+                musicBtn.classList.add('paused');
+            }
+        }
+
+        function checkPassword() {
+            const inputPassword = document.getElementById('pwdField').value;
+            const errorTxt = document.getElementById('errorTxt');
+
+            if (inputPassword === CORRECT_PASSWORD) {
+                document.getElementById('loginPage').classList.remove('active');
+                document.getElementById('page1').classList.add('active');
+                
+                // พยายามสั่งเปิดอัตโนมัติรอบแรก
+                music.play().then(() => {
+                    musicBtn.innerHTML = "🎵";
+                    musicBtn.classList.remove('paused');
+                }).catch(error => {
+                    console.log("Autoplay waiting for manual click.");
+                });
+                
+                startHeartEffect(); 
+            } else {
+                errorTxt.style.display = "block";
+                document.getElementById('pwdField').value = ""; 
+            }
+        }
+
+        function nextPage(pageNumber) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => card.classList.remove('active'));
+            
+            const nextPage = document.getElementById('page' + pageNumber);
+            if (nextPage) {
+                nextPage.classList.add('active');
+            }
+        }
+
+        function resetCard() {
+            nextPage(1);
+        }
+
+        function startHeartEffect() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('bg-heart');
+                
+                const heartTypes = ['❤️', '💖', '💗', '💕', '✨', '🚀', '🌕'];
+                heart.innerHTML = heartTypes[Math.floor(Math.random() * heartTypes.length)];
+                
+                heart.style.left = Math.random() * 100 + 'vw';
+                const size = Math.random() * 20 + 10;
+                heart.style.fontSize = size + 'px';
+                
+                const duration = Math.random() * 3 + 3;
+                heart.style.animationDuration = duration + 's';
+                
+                document.body.appendChild(heart);
+                
+                setTimeout(() => {
+                    heart.remove();
+                }, duration * 1000);
+            }, 300);
+        }
+    </script>
+</body>
+</html>
